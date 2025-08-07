@@ -1,18 +1,23 @@
 package calendar
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/somenave/eventsCalendar/events"
+	"github.com/somenave/eventsCalendar/storage"
 )
 
 type Calendar struct {
 	calendarEvents map[string]*events.Event
+	storage        storage.Storage
 }
 
-func NewCalendar() *Calendar {
+func NewCalendar(storage storage.Storage) *Calendar {
+	data := make(map[string]*events.Event)
 	return &Calendar{
-		calendarEvents: make(map[string]*events.Event),
+		calendarEvents: data,
+		storage:        storage,
 	}
 }
 
@@ -59,4 +64,22 @@ func (calendar *Calendar) ShowEvents() {
 		event.Print()
 	}
 	fmt.Println("---")
+}
+
+func (calendar *Calendar) Save() error {
+	data, err := json.Marshal(calendar.calendarEvents)
+	if err != nil {
+		return err
+	}
+	err = calendar.storage.Save(data)
+	return err
+}
+
+func (calendar *Calendar) Load() error {
+	data, err := calendar.storage.Load()
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, &calendar.calendarEvents)
+	return err
 }

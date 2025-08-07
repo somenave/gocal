@@ -3,10 +3,25 @@ package main
 import (
 	"fmt"
 	"github.com/somenave/eventsCalendar/calendar"
+	"github.com/somenave/eventsCalendar/storage"
 )
 
 func main() {
-	c := calendar.NewCalendar()
+	s := storage.NewStorage("calendar.json")
+	c := calendar.NewCalendar(*s)
+	defer func() {
+		err := c.Save()
+		if err != nil {
+			fmt.Println("Error saving calendar:", err)
+		}
+	}()
+
+	err := c.Load()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	c.ShowEvents()
 
 	event1, err1 := c.AddEvent("Meeting", "2025/06/12 12:00")
 	if err1 != nil {
@@ -29,9 +44,9 @@ func main() {
 		fmt.Println("Event updated")
 	}
 
-	err := c.DeleteEvent(event1.ID)
-	if err != nil {
-		fmt.Println("Error:", err)
+	err4 := c.DeleteEvent(event1.ID)
+	if err4 != nil {
+		fmt.Println("Error:", err4)
 	} else {
 		fmt.Println("Event deleted")
 	}
