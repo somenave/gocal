@@ -21,8 +21,8 @@ func NewCalendar(storage storage.Storage) *Calendar {
 	}
 }
 
-func (calendar *Calendar) AddEvent(title string, date string) (*events.Event, error) {
-	event, err := events.NewEvent(title, date)
+func (calendar *Calendar) AddEvent(title string, date string, priority string) (*events.Event, error) {
+	event, err := events.NewEvent(title, date, priority)
 	if err != nil {
 		return &events.Event{}, err
 	}
@@ -37,13 +37,13 @@ func (calendar *Calendar) AddEvent(title string, date string) (*events.Event, er
 	return event, nil
 }
 
-func (calendar *Calendar) EditEvent(id string, title string, startAt string) error {
+func (calendar *Calendar) EditEvent(id string, title string, startAt string, priority string) error {
 	event, exist := calendar.calendarEvents[id]
 	if !exist {
 		return errors.New("there is no event with id " + id)
 	}
 
-	err := event.Update(title, startAt)
+	err := event.Update(title, startAt, priority)
 
 	return err
 }

@@ -23,21 +23,21 @@ func main() {
 
 	c.ShowEvents()
 
-	event1, err1 := c.AddEvent("Meeting", "2025/06/12 12:00")
+	event1, err1 := c.AddEvent("Meeting", "2025/06/12 12:00", "low")
 	if err1 != nil {
 		fmt.Println("Error:", err1)
 	} else {
 		fmt.Println(event1.Title, "added")
 	}
 
-	event2, err2 := c.AddEvent("One more meeting", "2025/06/12 16:00")
+	event2, err2 := c.AddEvent("One more meeting", "2025/06/12 16:00", "medium")
 	if err2 != nil {
 		fmt.Println("Error:", err2)
 	} else {
 		fmt.Println(event2.Title, "added")
 	}
 
-	err3 := c.EditEvent(event2.ID, "Call", "2025/06/12 16:50")
+	err3 := c.EditEvent(event2.ID, "Call", "2025/06/12 16:50", "high")
 	if err3 != nil {
 		fmt.Println("Error:", err3)
 	} else {
