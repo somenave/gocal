@@ -6,34 +6,35 @@ import (
 )
 
 func main() {
-	event1, err1 := calendar.AddEvent("Event 1", "2025/08/10 20:00")
+	c := calendar.NewCalendar()
+
+	event1, err1 := c.AddEvent("Meeting", "2025/06/12 12:00")
 	if err1 != nil {
-		fmt.Println("Error when adding new event:", err1)
+		fmt.Println("Error:", err1)
+	} else {
+		fmt.Println(event1.Title, "added")
 	}
-	event2, err2 := calendar.AddEvent("Event 2", "2025/08/12 15:00")
+
+	event2, err2 := c.AddEvent("One more meeting", "2025/06/12 16:00")
 	if err2 != nil {
-		fmt.Println("Error when adding new event:", err2)
+		fmt.Println("Error:", err2)
+	} else {
+		fmt.Println(event2.Title, "added")
 	}
-	calendar.ShowEvents()
 
-	calendar.DeleteEvent(event1.ID)
-
-	err3 := calendar.EditEvent(event2.ID, "Event, 2 Updated.", "2025/08/12 16:50")
+	err3 := c.EditEvent(event2.ID, "Call", "2025/06/12 16:50")
 	if err3 != nil {
-		fmt.Println("Error when editing event:", err3)
+		fmt.Println("Error:", err3)
+	} else {
+		fmt.Println("Event updated")
 	}
 
-	err4 := calendar.EditEvent(event1.ID, "Should be error", "2025/08/12 20:00")
-	if err4 != nil {
-		fmt.Println("Error when editing event:", err4)
+	err := c.DeleteEvent(event1.ID)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println("Event deleted")
 	}
 
-	_, err5 := calendar.AddEvent("E", "2025/08/12 15:00")
-	if err5 != nil {
-		fmt.Println("Error when adding new event:", err5)
-	}
-
-	calendar.DeleteEvent(event1.ID)
-
-	calendar.ShowEvents()
+	c.ShowEvents()
 }
