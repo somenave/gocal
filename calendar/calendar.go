@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/somenave/eventsCalendar/events"
+	"github.com/somenave/eventsCalendar/reminder"
 	"github.com/somenave/eventsCalendar/storage"
+	"time"
 )
 
 type Calendar struct {
@@ -64,6 +66,15 @@ func (calendar *Calendar) ShowEvents() {
 		event.Print()
 	}
 	fmt.Println("---")
+}
+
+func (calendar *Calendar) setEventReminder(id string, message string, at time.Time) error {
+	event, exist := calendar.calendarEvents[id]
+	if !exist {
+		return errors.New("there is no event with id " + id)
+	}
+	event.Reminder = reminder.NewReminder(message, at)
+	return nil
 }
 
 func (calendar *Calendar) Save() error {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/araddon/dateparse"
 	"github.com/google/uuid"
+	"github.com/somenave/eventsCalendar/reminder"
 	"time"
 )
 
@@ -13,6 +14,7 @@ type Event struct {
 	Title    string
 	StartAt  time.Time
 	Priority Priority
+	Reminder *reminder.Reminder
 }
 
 func NewEvent(title string, startDate string, priority string) (*Event, error) {
@@ -54,6 +56,7 @@ func buildEvent(id string, title string, dateStr string, priorityStr string) (*E
 		Title:    title,
 		StartAt:  startDate,
 		Priority: priority,
+		Reminder: nil,
 	}, nil
 }
 
@@ -67,4 +70,12 @@ func ParseDate(date string) (time.Time, error) {
 
 func getNextID() string {
 	return uuid.New().String()
+}
+
+func (e *Event) AddReminder(message string, at time.Time) {
+	e.Reminder = reminder.NewReminder(message, at)
+}
+
+func (e *Event) RemoveReminder() {
+	e.Reminder = nil
 }
