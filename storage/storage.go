@@ -1,21 +1,15 @@
 package storage
 
-import "os"
+type Store interface {
+	Save(data []byte) error
+	Load() ([]byte, error)
+	GetFilename() string
+}
 
 type Storage struct {
 	filename string
 }
 
-func NewStorage(filename string) *Storage {
-	return &Storage{filename}
-}
-
-func (storage *Storage) Save(data []byte) error {
-	err := os.WriteFile(storage.filename, data, 0644)
-	return err
-}
-
-func (storage *Storage) Load() ([]byte, error) {
-	data, err := os.ReadFile(storage.filename)
-	return data, err
+func (s *Storage) GetFilename() string {
+	return s.filename
 }

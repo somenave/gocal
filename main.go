@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	s := storage.NewStorage("calendar.json")
-	c := calendar.NewCalendar(*s)
+	s := storage.NewZipStorage("calendar.zip")
+	c := calendar.NewCalendar(s)
 	defer func() {
 		err := c.Save()
 		if err != nil {

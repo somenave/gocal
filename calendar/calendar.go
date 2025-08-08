@@ -12,14 +12,14 @@ import (
 
 type Calendar struct {
 	calendarEvents map[string]*events.Event
-	storage        storage.Storage
+	storage        storage.Store
 }
 
-func NewCalendar(storage storage.Storage) *Calendar {
+func NewCalendar(s storage.Store) *Calendar {
 	data := make(map[string]*events.Event)
 	return &Calendar{
 		calendarEvents: data,
-		storage:        storage,
+		storage:        s,
 	}
 }
 
