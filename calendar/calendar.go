@@ -40,9 +40,9 @@ func (calendar *Calendar) AddEvent(title string, date string, priority string) (
 }
 
 func (calendar *Calendar) EditEvent(id string, title string, startAt string, priority string) error {
-	event, exist := calendar.calendarEvents[id]
-	if !exist {
-		return errors.New("there is no event with id " + id)
+	event, existErr := calendar.checkEventExist(id)
+	if existErr != nil {
+		return existErr
 	}
 
 	err := event.Update(title, startAt, priority)
@@ -51,16 +51,20 @@ func (calendar *Calendar) EditEvent(id string, title string, startAt string, pri
 }
 
 func (calendar *Calendar) DeleteEvent(id string) error {
-	_, exist := calendar.calendarEvents[id]
-	if exist {
-		delete(calendar.calendarEvents, id)
-		return nil
-	} else {
-		return errors.New("there is no event with id " + id)
+	_, existErr := calendar.checkEventExist(id)
+	if existErr != nil {
+		return existErr
 	}
+
+	delete(calendar.calendarEvents, id)
+	return nil
 }
 
 func (calendar *Calendar) ShowEvents() {
+	if len(calendar.calendarEvents) == 0 {
+		fmt.Println("No events found")
+		return
+	}
 	fmt.Println("---")
 	for _, event := range calendar.calendarEvents {
 		event.Print()
@@ -68,10 +72,18 @@ func (calendar *Calendar) ShowEvents() {
 	fmt.Println("---")
 }
 
-func (calendar *Calendar) setEventReminder(id string, message string, at time.Time) error {
+func (calendar *Calendar) checkEventExist(id string) (*events.Event, error) {
 	event, exist := calendar.calendarEvents[id]
-	if !exist {
-		return errors.New("there is no event with id " + id)
+	if exist {
+		return event, nil
+	}
+	return nil, errors.New("there is no event with id " + id)
+}
+
+func (calendar *Calendar) setEventReminder(id string, message string, at time.Time) error {
+	event, existErr := calendar.checkEventExist(id)
+	if existErr != nil {
+		return existErr
 	}
 	event.Reminder = reminder.NewReminder(message, at)
 	return nil
