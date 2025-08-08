@@ -9,6 +9,7 @@ require (
 
 require (
 	github.com/c-bata/go-prompt v0.2.6 // indirect
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.10 // indirect

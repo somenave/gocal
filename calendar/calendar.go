@@ -45,9 +45,7 @@ func (calendar *Calendar) EditEvent(id string, title string, startAt string, pri
 		return existErr
 	}
 
-	err := event.Update(title, startAt, priority)
-
-	return err
+	return event.Update(title, startAt, priority)
 }
 
 func (calendar *Calendar) DeleteEvent(id string) error {
@@ -94,8 +92,7 @@ func (calendar *Calendar) Save() error {
 	if err != nil {
 		return err
 	}
-	err = calendar.storage.Save(data)
-	return err
+	return calendar.storage.Save(data)
 }
 
 func (calendar *Calendar) Load() error {
@@ -103,6 +100,5 @@ func (calendar *Calendar) Load() error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(data, &calendar.calendarEvents)
-	return err
+	return json.Unmarshal(data, &calendar.calendarEvents)
 }
