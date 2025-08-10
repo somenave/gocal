@@ -22,16 +22,3 @@ func (p Priority) Validate() error {
 func (p Priority) IsValid() bool {
 	return p.Validate() == nil
 }
-
-func NewPriority(priority string) (Priority, error) {
-	switch priority {
-	case "low":
-		return PriorityLow, nil
-	case "medium":
-		return PriorityMedium, nil
-	case "high":
-		return PriorityHigh, nil
-	default:
-		return "", errors.New("invalid priority")
-	}
-}

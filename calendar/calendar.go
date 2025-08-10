@@ -24,7 +24,7 @@ func NewCalendar(s storage.Store) *Calendar {
 }
 
 func (calendar *Calendar) AddEvent(title string, date string, priority string) (*events.Event, error) {
-	event, err := events.NewEvent(title, date, priority)
+	event, err := events.NewEvent(title, date, events.Priority(priority))
 	if err != nil {
 		return &events.Event{}, err
 	}
@@ -45,7 +45,7 @@ func (calendar *Calendar) EditEvent(id string, title string, startAt string, pri
 		return existErr
 	}
 
-	return event.Update(title, startAt, priority)
+	return event.Update(title, startAt, events.Priority(priority))
 }
 
 func (calendar *Calendar) DeleteEvent(id string) error {

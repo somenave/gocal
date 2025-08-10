@@ -17,16 +17,12 @@ type Event struct {
 	Reminder *reminder.Reminder
 }
 
-func NewEvent(title string, startDate string, priority string) (*Event, error) {
+func NewEvent(title string, startDate string, priority Priority) (*Event, error) {
 	return buildEvent(getNextID(), title, startDate, priority)
 }
 
-func (e Event) Print() {
-	fmt.Println(e.Title + " — " + e.StartAt.Format("02 Jan 2006 15:04, Mon") + " — " + string(e.Priority) + " — " + e.ID)
-}
-
-func (e *Event) Update(title string, dateStr string, priorityStr string) error {
-	event, err := buildEvent(e.ID, title, dateStr, priorityStr)
+func (e *Event) Update(title string, dateStr string, priority Priority) error {
+	event, err := buildEvent(e.ID, title, dateStr, priority)
 	if err != nil {
 		return err
 	}
@@ -36,7 +32,7 @@ func (e *Event) Update(title string, dateStr string, priorityStr string) error {
 	return nil
 }
 
-func buildEvent(id string, title string, dateStr string, priorityStr string) (*Event, error) {
+func buildEvent(id string, title string, dateStr string, priority Priority) (*Event, error) {
 	if !IsValidTitle(title) {
 		return &Event{}, errors.New("title is not valid")
 	}
@@ -46,7 +42,7 @@ func buildEvent(id string, title string, dateStr string, priorityStr string) (*E
 		return &Event{}, errors.New("date is not valid")
 	}
 
-	priority, priorityErr := NewPriority(priorityStr)
+	priorityErr := Priority.Validate(priority)
 	if priorityErr != nil {
 		return &Event{}, priorityErr
 	}
@@ -58,6 +54,10 @@ func buildEvent(id string, title string, dateStr string, priorityStr string) (*E
 		Priority: priority,
 		Reminder: nil,
 	}, nil
+}
+
+func (e Event) Print() {
+	fmt.Println(e.Title + " — " + e.StartAt.Format("02 Jan 2006 15:04, Mon") + " — " + string(e.Priority) + " — " + e.ID)
 }
 
 func ParseDate(date string) (time.Time, error) {
