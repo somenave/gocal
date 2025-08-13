@@ -5,9 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/somenave/eventsCalendar/events"
-	"github.com/somenave/eventsCalendar/reminder"
 	"github.com/somenave/eventsCalendar/storage"
-	"time"
 )
 
 type Calendar struct {
@@ -21,6 +19,18 @@ func NewCalendar(s storage.Store) *Calendar {
 		calendarEvents: data,
 		storage:        s,
 	}
+}
+
+func (calendar *Calendar) ShowEvents() {
+	if len(calendar.calendarEvents) == 0 {
+		fmt.Println("No events found")
+		return
+	}
+	fmt.Println("---")
+	for _, event := range calendar.calendarEvents {
+		event.Print()
+	}
+	fmt.Println("---")
 }
 
 func (calendar *Calendar) AddEvent(title string, date string, priority string) (*events.Event, error) {
@@ -58,32 +68,20 @@ func (calendar *Calendar) DeleteEvent(id string) error {
 	return nil
 }
 
-func (calendar *Calendar) ShowEvents() {
-	if len(calendar.calendarEvents) == 0 {
-		fmt.Println("No events found")
-		return
-	}
-	fmt.Println("---")
-	for _, event := range calendar.calendarEvents {
-		event.Print()
-	}
-	fmt.Println("---")
-}
-
-func (calendar *Calendar) checkEventExist(id string) (*events.Event, error) {
-	event, exist := calendar.calendarEvents[id]
-	if exist {
-		return event, nil
-	}
-	return nil, errors.New("there is no event with id " + id)
-}
-
-func (calendar *Calendar) setEventReminder(id string, message string, at time.Time) error {
+func (calendar *Calendar) SetEventReminder(id string, message string, at string) error {
 	event, existErr := calendar.checkEventExist(id)
 	if existErr != nil {
 		return existErr
 	}
-	event.Reminder = reminder.NewReminder(message, at)
+	return event.AddReminder(message, at)
+}
+
+func (calendar *Calendar) RemoveEventReminder(id string) error {
+	event, existErr := calendar.checkEventExist(id)
+	if existErr != nil {
+		return existErr
+	}
+	event.RemoveReminder()
 	return nil
 }
 
@@ -101,4 +99,12 @@ func (calendar *Calendar) Load() error {
 		return err
 	}
 	return json.Unmarshal(data, &calendar.calendarEvents)
+}
+
+func (calendar *Calendar) checkEventExist(id string) (*events.Event, error) {
+	event, exist := calendar.calendarEvents[id]
+	if exist {
+		return event, nil
+	}
+	return nil, errors.New("there is no event with id " + id)
 }

@@ -29,54 +29,28 @@ func (c *Cmd) executor(input string) {
 	}
 
 	cmd := strings.ToLower(parts[0])
+	args := parts[1:]
 	switch cmd {
 	case "add":
-		if len(parts) != 4 {
-			fmt.Println("Format: add 'event name' 'date' 'priority'")
-			return
-		}
-		title := parts[1]
-		date := parts[2]
-		priority := parts[3]
-
-		e, err := c.calendar.AddEvent(title, date, priority)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println("Event", e.Title, "has been added")
-		}
+		c.addEvent(args)
 	case "list":
 		c.calendar.ShowEvents()
 	case "remove":
-		if len(parts) != 2 {
-			fmt.Println("Format: remove 'event ID'")
-			return
-		}
-		eventId := parts[1]
-		err := c.calendar.DeleteEvent(eventId)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println("Event has been removed")
-		}
+		c.removeEvent(args)
 	case "update":
-		if len(parts) != 5 {
-			fmt.Println("Format: update 'event ID' 'name' 'date' 'priority'")
-			return
-		}
-		id, name, date, priority := parts[1], parts[2], parts[3], parts[4]
-		err := c.calendar.EditEvent(id, name, date, priority)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println("Event has been updated")
+		c.updateEvent(args)
+	case "reminder:set":
+		c.setReminder(args)
+	case "reminder:remove":
+		c.removeReminder(args)
 	case "help":
 		fmt.Println("supported commands:")
 		fmt.Println(" 'add' >> format: add 'event name' 'date' 'priority'")
 		fmt.Println(" 'list'")
 		fmt.Println(" 'remove' >> format: remove 'event ID'")
 		fmt.Println(" 'update' >> format: update 'event ID' 'name' 'date' 'priority'")
+		fmt.Println(" 'reminder:set' >> format: reminder:set 'event ID' 'message' 'date'")
+		fmt.Println(" 'reminder:remove' >> format: reminder:remove 'event ID'")
 		fmt.Println(" 'help'")
 	case "exit":
 		err := c.calendar.Save()
@@ -98,6 +72,8 @@ func (c *Cmd) completer(d prompt.Document) []prompt.Suggest {
 		{Text: "list", Description: "list all events"},
 		{Text: "remove", Description: "remove event"},
 		{Text: "update", Description: "update event"},
+		{Text: "reminder:set", Description: "set reminder for event"},
+		{Text: "reminder:remove", Description: "remove reminder for event"},
 		{Text: "help", Description: "show help"},
 		{Text: "exit", Description: "exit program"},
 	}

@@ -3,16 +3,16 @@ package events
 import (
 	"errors"
 	"fmt"
-	"github.com/araddon/dateparse"
 	"github.com/google/uuid"
+	"github.com/somenave/eventsCalendar/helpers"
 	"github.com/somenave/eventsCalendar/reminder"
 	"time"
 )
 
 type Event struct {
-	ID       string
-	Title    string
-	StartAt  time.Time
+	ID       string    `json:"id"`
+	Title    string    `json:"title"`
+	StartAt  time.Time `json:"start_at"`
 	Priority Priority
 	Reminder *reminder.Reminder
 }
@@ -37,7 +37,7 @@ func buildEvent(id string, title string, dateStr string, priority Priority) (*Ev
 		return &Event{}, errors.New("title is not valid")
 	}
 
-	startDate, err := ParseDate(dateStr)
+	startDate, err := helpers.ParseDate(dateStr)
 	if err != nil {
 		return &Event{}, errors.New("date is not valid")
 	}
@@ -57,25 +57,28 @@ func buildEvent(id string, title string, dateStr string, priority Priority) (*Ev
 }
 
 func (e Event) Print() {
-	fmt.Println(e.Title + " — " + e.StartAt.Format("02 Jan 2006 15:04, Mon") + " — " + string(e.Priority) + " — " + e.ID)
-}
-
-func ParseDate(date string) (time.Time, error) {
-	dateParsed, err := dateparse.ParseAny(date)
-	if err != nil {
-		return time.Time{}, err
-	}
-	return dateParsed, nil
+	fmt.Println(e.ID + ": " + e.Title + " — " + e.StartAt.Format("02 Jan 2006 15:04, Mon") + " — " + string(e.Priority))
 }
 
 func getNextID() string {
 	return uuid.New().String()
 }
 
-func (e *Event) AddReminder(message string, at time.Time) {
-	e.Reminder = reminder.NewReminder(message, at)
+func (e *Event) AddReminder(message string, at string) error {
+	r, err := reminder.NewReminder(message, at)
+	if err != nil {
+		return err
+	}
+	e.Reminder = r
+	r.Start()
+	return nil
 }
 
-func (e *Event) RemoveReminder() {
-	e.Reminder = nil
+func (e *Event) RemoveReminder() error {
+	if e.Reminder != nil {
+		e.Reminder.Stop()
+		e.Reminder = nil
+		return nil
+	}
+	return errors.New("reminder is not set")
 }
