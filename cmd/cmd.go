@@ -34,7 +34,7 @@ func (c *Cmd) executor(input string) {
 	case "add":
 		c.addEvent(args)
 	case "list":
-		c.calendar.ShowEvents()
+		c.showEvents()
 	case "remove":
 		c.removeEvent(args)
 	case "update":

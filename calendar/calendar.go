@@ -3,7 +3,6 @@ package calendar
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/somenave/eventsCalendar/events"
 	"github.com/somenave/eventsCalendar/storage"
 )
@@ -23,16 +22,8 @@ func NewCalendar(s storage.Store) *Calendar {
 	}
 }
 
-func (c *Calendar) ShowEvents() {
-	if len(c.calendarEvents) == 0 {
-		fmt.Println("No events found")
-		return
-	}
-	fmt.Println("---")
-	for _, event := range c.calendarEvents {
-		event.Print()
-	}
-	fmt.Println("---")
+func (c *Calendar) GetEvents() map[string]*events.Event {
+	return c.calendarEvents
 }
 
 func (c *Calendar) AddEvent(title string, date string, priority string) (*events.Event, error) {

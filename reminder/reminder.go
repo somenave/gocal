@@ -2,7 +2,6 @@ package reminder
 
 import (
 	"errors"
-	"fmt"
 	"github.com/somenave/eventsCalendar/helpers"
 	"time"
 )
@@ -32,23 +31,12 @@ func NewReminder(message string, at string, notify func(string)) (*Reminder, err
 	}, nil
 }
 
-func (r *Reminder) sendMessage() error {
-	if r.Sent {
-		return errors.New("reminder already sent")
-	}
-	if r.notify != nil {
-		r.notify(r.Message)
-		r.Sent = true
-		return nil
-	}
-	return errors.New("reminder not sent")
-}
-
 func (r *Reminder) Send() {
-	err := r.sendMessage()
-	if err != nil {
-		fmt.Println(err)
+	if r.Sent || r.notify == nil {
+		return
 	}
+	r.notify(r.Message)
+	r.Sent = true
 }
 
 func (r *Reminder) Start() {
@@ -61,9 +49,7 @@ func (r *Reminder) Stop() error {
 		return errors.New("could not stop the reminder, timer doesn't exist")
 	}
 	stopped := r.timer.Stop()
-	if stopped {
-		fmt.Println("Reminder stopped")
-	} else {
+	if !stopped {
 		return errors.New("reminder has already expired or been stopped")
 	}
 	return nil

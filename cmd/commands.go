@@ -12,9 +12,9 @@ func (c *Cmd) addEvent(args []string) {
 	e, err := c.calendar.AddEvent(title, date, priority)
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		fmt.Println("Event", e.Title, "has been added")
+		return
 	}
+	fmt.Println("Event", e.Title, "has been added, ID:", e.ID)
 }
 
 func (c *Cmd) removeEvent(args []string) {
@@ -26,9 +26,9 @@ func (c *Cmd) removeEvent(args []string) {
 	err := c.calendar.DeleteEvent(eventId)
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		fmt.Println("Event has been removed")
+		return
 	}
+	fmt.Println("Event has been removed")
 }
 
 func (c *Cmd) updateEvent(args []string) {
@@ -85,4 +85,17 @@ func (c *Cmd) cancelReminder(args []string) {
 		return
 	}
 	fmt.Println("Reminder has been cancelled")
+}
+
+func (c *Cmd) showEvents() {
+	events := c.calendar.GetEvents()
+	if len(events) == 0 {
+		fmt.Println("No events found")
+		return
+	}
+	fmt.Println("---")
+	for _, event := range events {
+		fmt.Println(event.String())
+	}
+	fmt.Println("---")
 }

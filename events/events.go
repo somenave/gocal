@@ -2,7 +2,6 @@ package events
 
 import (
 	"errors"
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/somenave/eventsCalendar/helpers"
 	"github.com/somenave/eventsCalendar/reminder"
@@ -56,8 +55,8 @@ func buildEvent(id string, title string, dateStr string, priority Priority) (*Ev
 	}, nil
 }
 
-func (e Event) Print() {
-	fmt.Println(e.ID + ": " + e.Title + " — " + e.StartAt.Format("02 Jan 2006 15:04, Mon") + " — " + string(e.Priority))
+func (e Event) String() string {
+	return e.ID + ": " + e.Title + " — " + e.StartAt.Format("02 Jan 2006 15:04, Mon") + " — " + string(e.Priority)
 }
 
 func getNextID() string {
