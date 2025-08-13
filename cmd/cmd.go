@@ -62,6 +62,7 @@ func (c *Cmd) executor(input string) {
 		} else {
 			fmt.Println("Calendar saved")
 		}
+		close(c.calendar.Notification)
 		os.Exit(0)
 	default:
 		fmt.Println("invalid command")
@@ -95,5 +96,12 @@ func (c *Cmd) Run() {
 		c.completer,
 		prompt.OptionPrefix("> "),
 	)
+
+	go func() {
+		for msg := range c.calendar.Notification {
+			fmt.Printf("%s\n", msg)
+		}
+	}()
+
 	p.Run()
 }

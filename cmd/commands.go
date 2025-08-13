@@ -82,6 +82,7 @@ func (c *Cmd) cancelReminder(args []string) {
 	err := c.calendar.CancelEventReminder(eventId)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	fmt.Println("Reminder has been cancelled")
 }

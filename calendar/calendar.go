@@ -11,6 +11,7 @@ import (
 type Calendar struct {
 	calendarEvents map[string]*events.Event
 	storage        storage.Store
+	Notification   chan string
 }
 
 func NewCalendar(s storage.Store) *Calendar {
@@ -18,39 +19,40 @@ func NewCalendar(s storage.Store) *Calendar {
 	return &Calendar{
 		calendarEvents: data,
 		storage:        s,
+		Notification:   make(chan string),
 	}
 }
 
-func (calendar *Calendar) ShowEvents() {
-	if len(calendar.calendarEvents) == 0 {
+func (c *Calendar) ShowEvents() {
+	if len(c.calendarEvents) == 0 {
 		fmt.Println("No events found")
 		return
 	}
 	fmt.Println("---")
-	for _, event := range calendar.calendarEvents {
+	for _, event := range c.calendarEvents {
 		event.Print()
 	}
 	fmt.Println("---")
 }
 
-func (calendar *Calendar) AddEvent(title string, date string, priority string) (*events.Event, error) {
+func (c *Calendar) AddEvent(title string, date string, priority string) (*events.Event, error) {
 	event, err := events.NewEvent(title, date, events.Priority(priority))
 	if err != nil {
 		return &events.Event{}, err
 	}
 
-	for _, existingEvent := range calendar.calendarEvents {
+	for _, existingEvent := range c.calendarEvents {
 		if existingEvent.StartAt.Equal(event.StartAt) {
 			return &events.Event{}, errors.New("there is already an event at this time")
 		}
 	}
 
-	calendar.calendarEvents[event.ID] = event
+	c.calendarEvents[event.ID] = event
 	return event, nil
 }
 
-func (calendar *Calendar) EditEvent(id string, title string, startAt string, priority string) error {
-	event, existErr := calendar.checkEventExist(id)
+func (c *Calendar) EditEvent(id string, title string, startAt string, priority string) error {
+	event, existErr := c.checkEventExist(id)
 	if existErr != nil {
 		return existErr
 	}
@@ -58,35 +60,34 @@ func (calendar *Calendar) EditEvent(id string, title string, startAt string, pri
 	return event.Update(title, startAt, events.Priority(priority))
 }
 
-func (calendar *Calendar) DeleteEvent(id string) error {
-	_, existErr := calendar.checkEventExist(id)
+func (c *Calendar) DeleteEvent(id string) error {
+	_, existErr := c.checkEventExist(id)
 	if existErr != nil {
 		return existErr
 	}
 
-	delete(calendar.calendarEvents, id)
+	delete(c.calendarEvents, id)
 	return nil
 }
 
-func (calendar *Calendar) SetEventReminder(id string, message string, at string) error {
-	event, existErr := calendar.checkEventExist(id)
+func (c *Calendar) SetEventReminder(id string, message string, at string) error {
+	event, existErr := c.checkEventExist(id)
 	if existErr != nil {
 		return existErr
 	}
-	return event.AddReminder(message, at)
+	return event.AddReminder(message, at, c.Notify)
 }
 
-func (calendar *Calendar) RemoveEventReminder(id string) error {
-	event, existErr := calendar.checkEventExist(id)
+func (c *Calendar) RemoveEventReminder(id string) error {
+	event, existErr := c.checkEventExist(id)
 	if existErr != nil {
 		return existErr
 	}
-	event.RemoveReminder()
-	return nil
+	return event.RemoveReminder()
 }
 
-func (calendar *Calendar) CancelEventReminder(id string) error {
-	event, existErr := calendar.checkEventExist(id)
+func (c *Calendar) CancelEventReminder(id string) error {
+	event, existErr := c.checkEventExist(id)
 	if existErr != nil {
 		return existErr
 	}
@@ -94,24 +95,28 @@ func (calendar *Calendar) CancelEventReminder(id string) error {
 	return err
 }
 
-func (calendar *Calendar) Save() error {
-	data, err := json.Marshal(calendar.calendarEvents)
+func (c *Calendar) Notify(msg string) {
+	c.Notification <- msg
+}
+
+func (c *Calendar) Save() error {
+	data, err := json.Marshal(c.calendarEvents)
 	if err != nil {
 		return err
 	}
-	return calendar.storage.Save(data)
+	return c.storage.Save(data)
 }
 
-func (calendar *Calendar) Load() error {
-	data, err := calendar.storage.Load()
+func (c *Calendar) Load() error {
+	data, err := c.storage.Load()
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(data, &calendar.calendarEvents)
+	return json.Unmarshal(data, &c.calendarEvents)
 }
 
-func (calendar *Calendar) checkEventExist(id string) (*events.Event, error) {
-	event, exist := calendar.calendarEvents[id]
+func (c *Calendar) checkEventExist(id string) (*events.Event, error) {
+	event, exist := c.calendarEvents[id]
 	if exist {
 		return event, nil
 	}

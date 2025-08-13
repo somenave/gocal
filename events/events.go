@@ -64,8 +64,8 @@ func getNextID() string {
 	return uuid.New().String()
 }
 
-func (e *Event) AddReminder(message string, at string) error {
-	r, err := reminder.NewReminder(message, at)
+func (e *Event) AddReminder(message string, at string, notify func(string)) error {
+	r, err := reminder.NewReminder(message, at, notify)
 	if err != nil {
 		return err
 	}
@@ -78,14 +78,12 @@ func (e *Event) StopReminder() error {
 	if e.Reminder == nil {
 		return errors.New("reminder doesn't exist")
 	}
-	e.Reminder.Stop()
-	return nil
+	return e.Reminder.Stop()
 }
 
 func (e *Event) RemoveReminder() error {
-	err := e.StopReminder()
-	if err != nil {
-		return err
+	if e.Reminder == nil {
+		return errors.New("reminder doesn't exist")
 	}
 	e.Reminder = nil
 	return nil

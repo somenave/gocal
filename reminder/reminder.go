@@ -12,9 +12,10 @@ type Reminder struct {
 	At      time.Time `json:"at"`
 	timer   *time.Timer
 	Sent    bool `json:"sent"`
+	notify  func(string)
 }
 
-func NewReminder(message string, at string) (*Reminder, error) {
+func NewReminder(message string, at string, notify func(string)) (*Reminder, error) {
 	date, err := helpers.ParseDate(at)
 	if err != nil {
 		return nil, err
@@ -27,15 +28,27 @@ func NewReminder(message string, at string) (*Reminder, error) {
 		At:      date,
 		timer:   nil,
 		Sent:    false,
+		notify:  notify,
 	}, nil
 }
 
-func (r *Reminder) Send() {
+func (r *Reminder) sendMessage() error {
 	if r.Sent {
-		return
+		return errors.New("reminder already sent")
 	}
-	fmt.Println("Reminder:", r.Message)
-	r.Sent = true
+	if r.notify != nil {
+		r.notify(r.Message)
+		r.Sent = true
+		return nil
+	}
+	return errors.New("reminder not sent")
+}
+
+func (r *Reminder) Send() {
+	err := r.sendMessage()
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func (r *Reminder) Start() {
@@ -43,11 +56,15 @@ func (r *Reminder) Start() {
 	r.timer = time.AfterFunc(duration, r.Send)
 }
 
-func (r *Reminder) Stop() {
+func (r *Reminder) Stop() error {
+	if r.timer == nil {
+		return errors.New("could not stop the reminder, timer doesn't exist")
+	}
 	stopped := r.timer.Stop()
 	if stopped {
 		fmt.Println("Reminder stopped")
 	} else {
-		fmt.Println("Reminder has already expired or been stopped")
+		return errors.New("reminder has already expired or been stopped")
 	}
+	return nil
 }
