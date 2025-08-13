@@ -72,3 +72,16 @@ func (c *Cmd) removeReminder(args []string) {
 	}
 	fmt.Println("Reminder has been removed")
 }
+
+func (c *Cmd) cancelReminder(args []string) {
+	if len(args) != 1 {
+		fmt.Println("Format: reminder:cancel 'event ID'")
+		return
+	}
+	eventId := args[0]
+	err := c.calendar.CancelEventReminder(eventId)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("Reminder has been cancelled")
+}

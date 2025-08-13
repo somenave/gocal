@@ -85,6 +85,15 @@ func (calendar *Calendar) RemoveEventReminder(id string) error {
 	return nil
 }
 
+func (calendar *Calendar) CancelEventReminder(id string) error {
+	event, existErr := calendar.checkEventExist(id)
+	if existErr != nil {
+		return existErr
+	}
+	err := event.StopReminder()
+	return err
+}
+
 func (calendar *Calendar) Save() error {
 	data, err := json.Marshal(calendar.calendarEvents)
 	if err != nil {

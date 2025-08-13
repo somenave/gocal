@@ -43,6 +43,8 @@ func (c *Cmd) executor(input string) {
 		c.setReminder(args)
 	case "reminder:remove":
 		c.removeReminder(args)
+	case "reminder:cancel":
+		c.cancelReminder(args)
 	case "help":
 		fmt.Println("supported commands:")
 		fmt.Println(" 'add' >> format: add 'event name' 'date' 'priority'")
@@ -51,6 +53,7 @@ func (c *Cmd) executor(input string) {
 		fmt.Println(" 'update' >> format: update 'event ID' 'name' 'date' 'priority'")
 		fmt.Println(" 'reminder:set' >> format: reminder:set 'event ID' 'message' 'date'")
 		fmt.Println(" 'reminder:remove' >> format: reminder:remove 'event ID'")
+		fmt.Println(" 'reminder:cancel' >> format: reminder:cancel 'event ID'")
 		fmt.Println(" 'help'")
 	case "exit":
 		err := c.calendar.Save()
@@ -74,6 +77,7 @@ func (c *Cmd) completer(d prompt.Document) []prompt.Suggest {
 		{Text: "update", Description: "update event"},
 		{Text: "reminder:set", Description: "set reminder for event"},
 		{Text: "reminder:remove", Description: "remove reminder for event"},
+		{Text: "reminder:cancel", Description: "cancel reminder for event"},
 		{Text: "help", Description: "show help"},
 		{Text: "exit", Description: "exit program"},
 	}

@@ -74,11 +74,19 @@ func (e *Event) AddReminder(message string, at string) error {
 	return nil
 }
 
-func (e *Event) RemoveReminder() error {
-	if e.Reminder != nil {
-		e.Reminder.Stop()
-		e.Reminder = nil
-		return nil
+func (e *Event) StopReminder() error {
+	if e.Reminder == nil {
+		return errors.New("reminder doesn't exist")
 	}
-	return errors.New("reminder is not set")
+	e.Reminder.Stop()
+	return nil
+}
+
+func (e *Event) RemoveReminder() error {
+	err := e.StopReminder()
+	if err != nil {
+		return err
+	}
+	e.Reminder = nil
+	return nil
 }

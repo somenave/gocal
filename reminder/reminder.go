@@ -44,5 +44,10 @@ func (r *Reminder) Start() {
 }
 
 func (r *Reminder) Stop() {
-	//
+	stopped := r.timer.Stop()
+	if stopped {
+		fmt.Println("Reminder stopped")
+	} else {
+		fmt.Println("Reminder has already expired or been stopped")
+	}
 }
