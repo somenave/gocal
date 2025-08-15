@@ -7,9 +7,12 @@ import (
 )
 
 func main() {
-	s := storage.NewJsonStorage("calendar.json")
-	c := calendar.NewCalendar(s)
+	cs := storage.NewJsonStorage("calendar.json")
+	c := calendar.NewCalendar(cs)
 
-	cli := cmd.NewCmd(c)
+	ls := storage.NewJsonStorage("calendar.log")
+	l := cmd.NewLogger(ls)
+
+	cli := cmd.NewCmd(c, l)
 	cli.Run()
 }

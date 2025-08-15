@@ -5,26 +5,55 @@ import (
 	"github.com/c-bata/go-prompt"
 	"github.com/google/shlex"
 	"github.com/somenave/eventsCalendar/calendar"
-	"os"
 	"strings"
 )
 
 type Cmd struct {
 	calendar *calendar.Calendar
+	logger   *Logger
 }
 
-func NewCmd(c *calendar.Calendar) *Cmd {
-	return &Cmd{calendar: c}
+func NewCmd(c *calendar.Calendar, l *Logger) *Cmd {
+	return &Cmd{calendar: c, logger: l}
+}
+
+func (c *Cmd) Run() {
+	c.logger.Load()
+
+	err := c.calendar.Load()
+	if err != nil {
+		fmt.Println(err)
+		c.logger.Add(LogError, err.Error())
+	}
+
+	p := prompt.New(
+		c.executor,
+		c.completer,
+		prompt.OptionPrefix("> "),
+	)
+
+	go func() {
+		for msg := range c.calendar.Notification {
+			fmt.Printf("%s\n", msg)
+			c.logger.Add(LogNotification, msg)
+		}
+	}()
+
+	p.Run()
 }
 
 func (c *Cmd) executor(input string) {
-	parts, err := shlex.Split(input)
-	if err != nil {
-		fmt.Println("invalid input")
+	input = strings.TrimSpace(input)
+	if input == "" {
 		return
 	}
-	if len(parts) < 1 {
-		fmt.Println("input is empty, type command")
+
+	c.logger.Add(LogInput, input)
+
+	parts, err := shlex.Split(input)
+	if err != nil {
+		fmt.Println(invalidInputErrMsg)
+		c.logger.Add(LogError, invalidInputErrMsg)
 		return
 	}
 
@@ -47,31 +76,27 @@ func (c *Cmd) executor(input string) {
 		c.cancelReminder(args)
 	case "help":
 		fmt.Println("supported commands:")
-		fmt.Println(" 'add' >> format: add 'event name' 'date' 'priority'")
+		fmt.Println(" 'add' >>", addFormatMsg)
 		fmt.Println(" 'list'")
-		fmt.Println(" 'remove' >> format: remove 'event ID'")
-		fmt.Println(" 'update' >> format: update 'event ID' 'name' 'date' 'priority'")
-		fmt.Println(" 'reminder:set' >> format: reminder:set 'event ID' 'message' 'date'")
-		fmt.Println(" 'reminder:remove' >> format: reminder:remove 'event ID'")
-		fmt.Println(" 'reminder:cancel' >> format: reminder:cancel 'event ID'")
+		fmt.Println(" 'remove' >>", removeFormatMsg)
+		fmt.Println(" 'update' >>", updateFormatMsg)
+		fmt.Println(" 'reminder:set' >>", setReminderFormatMsg)
+		fmt.Println(" 'reminder:remove' >>", removeReminderFormatMsg)
+		fmt.Println(" 'reminder:cancel' >>", cancelReminderFormatMsg)
 		fmt.Println(" 'help'")
+	case "logs":
+		c.showLogs()
 	case "exit":
-		err := c.calendar.Save()
-		if err != nil {
-			fmt.Println("Error saving calendar:", err)
-		} else {
-			fmt.Println("Calendar saved")
-		}
-		close(c.calendar.Notification)
-		os.Exit(0)
+		c.exit()
 	default:
-		fmt.Println("invalid command")
-		fmt.Println("type 'help' for list of supported commands.")
+		fmt.Println(invalidCommandErrMsg)
+		c.logger.Add(LogOutput, invalidCommandErrMsg)
 	}
 }
 
 func (c *Cmd) completer(d prompt.Document) []prompt.Suggest {
 	suggestions := []prompt.Suggest{
+		{Text: "help", Description: "show help"},
 		{Text: "add", Description: "add new event"},
 		{Text: "list", Description: "list all events"},
 		{Text: "remove", Description: "remove event"},
@@ -79,29 +104,8 @@ func (c *Cmd) completer(d prompt.Document) []prompt.Suggest {
 		{Text: "reminder:set", Description: "set reminder for event"},
 		{Text: "reminder:remove", Description: "remove reminder for event"},
 		{Text: "reminder:cancel", Description: "cancel reminder for event"},
-		{Text: "help", Description: "show help"},
+		{Text: "logs", Description: "show logs"},
 		{Text: "exit", Description: "exit program"},
 	}
 	return prompt.FilterHasPrefix(suggestions, d.GetWordBeforeCursor(), true)
-}
-
-func (c *Cmd) Run() {
-	err := c.calendar.Load()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	p := prompt.New(
-		c.executor,
-		c.completer,
-		prompt.OptionPrefix("> "),
-	)
-
-	go func() {
-		for msg := range c.calendar.Notification {
-			fmt.Printf("%s\n", msg)
-		}
-	}()
-
-	p.Run()
 }
