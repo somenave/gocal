@@ -28,6 +28,7 @@ func (e *Event) Update(title string, dateStr string, priority Priority) error {
 
 	e.Title = event.Title
 	e.StartAt = event.StartAt
+	e.Priority = event.Priority
 	return nil
 }
 
