@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/somenave/eventsCalendar/logger"
 	"github.com/somenave/eventsCalendar/reminder"
 	"os"
 )
@@ -68,8 +69,6 @@ func (c *Cmd) setReminder(args []string) {
 	}
 	id, message, at := args[0], args[1], args[2]
 	err := c.calendar.SetEventReminder(id, message, at)
-
-	fmt.Println(message)
 
 	if err == nil {
 		fmt.Println(setReminderSuccessMsg)
@@ -152,10 +151,12 @@ func (c *Cmd) exit() {
 		msg := fmt.Sprintf("failed to save calendar: %v", err)
 		fmt.Println(msg)
 		c.logger.Add(LogError, msg)
+		logger.Error(err.Error())
 	} else {
 		fmt.Println(savedCalendarMsg)
 		c.logger.Add(LogOutput, savedCalendarMsg)
 		c.logger.Save()
+		logger.Info(savedCalendarMsg)
 	}
 	close(c.calendar.Notification)
 	os.Exit(0)

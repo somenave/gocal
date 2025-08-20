@@ -5,6 +5,7 @@ import (
 	"github.com/c-bata/go-prompt"
 	"github.com/google/shlex"
 	"github.com/somenave/eventsCalendar/calendar"
+	"github.com/somenave/eventsCalendar/logger"
 	"strings"
 )
 
@@ -27,6 +28,7 @@ func (c *Cmd) Run() {
 	if err != nil {
 		fmt.Println(err)
 		c.logger.Add(LogError, err.Error())
+		logger.Error(err.Error())
 	}
 
 	p := prompt.New(
@@ -39,6 +41,7 @@ func (c *Cmd) Run() {
 		for msg := range c.calendar.Notification {
 			fmt.Printf("%s\n", msg)
 			c.logger.Add(LogNotification, msg)
+			logger.Info(fmt.Sprintf("Notification: %s", msg))
 		}
 	}()
 
@@ -52,11 +55,13 @@ func (c *Cmd) executor(input string) {
 	}
 
 	c.logger.Add(LogInput, input)
+	logger.Info(fmt.Sprintf("Input: %s", input))
 
 	parts, err := shlex.Split(input)
 	if err != nil {
 		fmt.Println(invalidInputErrMsg)
 		c.logger.Add(LogError, invalidInputErrMsg)
+		logger.Info(invalidInputErrMsg)
 		return
 	}
 
@@ -94,6 +99,7 @@ func (c *Cmd) executor(input string) {
 	default:
 		fmt.Println(invalidCommandErrMsg)
 		c.logger.Add(LogOutput, invalidCommandErrMsg)
+		logger.Info(invalidCommandErrMsg)
 	}
 }
 
