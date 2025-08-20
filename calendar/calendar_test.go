@@ -1,11 +1,10 @@
-package tests
+package calendar
 
 import (
-	"github.com/somenave/eventsCalendar/calendar"
 	"testing"
 )
 
-var testCalendar = calendar.NewCalendar(nil)
+var testCalendar = NewCalendar(nil)
 
 func TestAddEvent(t *testing.T) {
 	_, err := testCalendar.AddEvent("Hello", "2025-01-02 10:20", "low")

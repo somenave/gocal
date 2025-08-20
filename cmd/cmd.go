@@ -18,9 +18,12 @@ func NewCmd(c *calendar.Calendar, l *Logger) *Cmd {
 }
 
 func (c *Cmd) Run() {
-	c.logger.Load()
+	err := c.logger.Load()
+	if err != nil {
+		fmt.Printf("Cannot load logger: %v", err.Error())
+	}
 
-	err := c.calendar.Load()
+	err = c.calendar.Load()
 	if err != nil {
 		fmt.Println(err)
 		c.logger.Add(LogError, err.Error())

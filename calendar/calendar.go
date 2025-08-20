@@ -3,9 +3,13 @@ package calendar
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/somenave/eventsCalendar/events"
 	"github.com/somenave/eventsCalendar/storage"
 )
+
+var ErrEventAtThisTimeExist = errors.New("there is already an event at this time")
+var ErrEventDoesNotExist = errors.New("there is no event with given id")
 
 type Calendar struct {
 	calendarEvents map[string]*events.Event
@@ -34,7 +38,7 @@ func (c *Calendar) AddEvent(title string, date string, priority string) (*events
 
 	for _, existingEvent := range c.calendarEvents {
 		if existingEvent.StartAt.Equal(event.StartAt) {
-			return &events.Event{}, errors.New("there is already an event at this time")
+			return &events.Event{}, ErrEventAtThisTimeExist
 		}
 	}
 
@@ -45,7 +49,7 @@ func (c *Calendar) AddEvent(title string, date string, priority string) (*events
 func (c *Calendar) EditEvent(id string, title string, startAt string, priority string) error {
 	event, existErr := c.checkEventExist(id)
 	if existErr != nil {
-		return existErr
+		return fmt.Errorf("can't edit event: %w", existErr)
 	}
 
 	return event.Update(title, startAt, events.Priority(priority))
@@ -54,7 +58,7 @@ func (c *Calendar) EditEvent(id string, title string, startAt string, priority s
 func (c *Calendar) DeleteEvent(id string) error {
 	_, existErr := c.checkEventExist(id)
 	if existErr != nil {
-		return existErr
+		return fmt.Errorf("can't delete event: %w", existErr)
 	}
 
 	delete(c.calendarEvents, id)
@@ -64,7 +68,7 @@ func (c *Calendar) DeleteEvent(id string) error {
 func (c *Calendar) SetEventReminder(id string, message string, at string) error {
 	event, existErr := c.checkEventExist(id)
 	if existErr != nil {
-		return existErr
+		return fmt.Errorf("can't set event reminder: %w", existErr)
 	}
 	return event.AddReminder(message, at, c.Notify)
 }
@@ -72,7 +76,7 @@ func (c *Calendar) SetEventReminder(id string, message string, at string) error 
 func (c *Calendar) RemoveEventReminder(id string) error {
 	event, existErr := c.checkEventExist(id)
 	if existErr != nil {
-		return existErr
+		return fmt.Errorf("can't remove event reminder: %w", existErr)
 	}
 	return event.RemoveReminder()
 }
@@ -80,7 +84,7 @@ func (c *Calendar) RemoveEventReminder(id string) error {
 func (c *Calendar) CancelEventReminder(id string) error {
 	event, existErr := c.checkEventExist(id)
 	if existErr != nil {
-		return existErr
+		return fmt.Errorf("can't cancel event reminder: %w", existErr)
 	}
 	err := event.StopReminder()
 	return err
@@ -93,7 +97,7 @@ func (c *Calendar) Notify(msg string) {
 func (c *Calendar) Save() error {
 	data, err := json.Marshal(c.calendarEvents)
 	if err != nil {
-		return err
+		return fmt.Errorf("can't save calendar: %w", err)
 	}
 	return c.storage.Save(data)
 }
@@ -101,7 +105,7 @@ func (c *Calendar) Save() error {
 func (c *Calendar) Load() error {
 	data, err := c.storage.Load()
 	if err != nil {
-		return err
+		return fmt.Errorf("can't load calendar: %w", err)
 	}
 	return json.Unmarshal(data, &c.calendarEvents)
 }
@@ -111,5 +115,5 @@ func (c *Calendar) checkEventExist(id string) (*events.Event, error) {
 	if exist {
 		return event, nil
 	}
-	return nil, errors.New("there is no event with id " + id)
+	return nil, ErrEventDoesNotExist
 }

@@ -3,8 +3,12 @@ package reminder
 import (
 	"errors"
 	"github.com/somenave/eventsCalendar/helpers"
+	"strings"
 	"time"
 )
+
+var ErrEmptyMessage = errors.New("message is empty")
+var ErrTimerNotExist = errors.New("timer doesn't exist")
 
 type Reminder struct {
 	Message string    `json:"message"`
@@ -15,6 +19,9 @@ type Reminder struct {
 }
 
 func NewReminder(message string, at string, notify func(string)) (*Reminder, error) {
+	if len(strings.TrimSpace(message)) == 0 {
+		return nil, ErrEmptyMessage
+	}
 	date, err := helpers.ParseDate(at)
 	if err != nil {
 		return nil, err
@@ -46,7 +53,7 @@ func (r *Reminder) Start() {
 
 func (r *Reminder) Stop() error {
 	if r.timer == nil {
-		return errors.New("could not stop the reminder, timer doesn't exist")
+		return ErrTimerNotExist
 	}
 	stopped := r.timer.Stop()
 	if !stopped {

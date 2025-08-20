@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"github.com/somenave/eventsCalendar/reminder"
 	"os"
 )
 
@@ -66,13 +68,24 @@ func (c *Cmd) setReminder(args []string) {
 	}
 	id, message, at := args[0], args[1], args[2]
 	err := c.calendar.SetEventReminder(id, message, at)
-	if err != nil {
-		fmt.Println(err)
-		c.logger.Add(LogOutput, err.Error())
+
+	fmt.Println(message)
+
+	if err == nil {
+		fmt.Println(setReminderSuccessMsg)
+		c.logger.Add(LogOutput, setReminderSuccessMsg)
 		return
 	}
-	fmt.Println(setReminderSuccessMsg)
-	c.logger.Add(LogOutput, setReminderSuccessMsg)
+
+	if errors.Is(err, reminder.ErrEmptyMessage) {
+		msg := "Can't set reminder with empty message"
+		fmt.Println(msg)
+		c.logger.Add(LogOutput, msg)
+		return
+	}
+
+	fmt.Println(err)
+	c.logger.Add(LogOutput, err.Error())
 }
 
 func (c *Cmd) removeReminder(args []string) {
