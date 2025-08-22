@@ -73,7 +73,7 @@ func (c *Cmd) executor(input string) {
 	case "list":
 		c.showEvents()
 	case "remove":
-		c.removeEvent(args)
+		c.removeEvent()
 	case "update":
 		c.updateEvent(args)
 	case "reminder:set":
@@ -86,7 +86,7 @@ func (c *Cmd) executor(input string) {
 		fmt.Println("supported commands:")
 		fmt.Println(" 'add' >>", addFormatMsg)
 		fmt.Println(" 'list'")
-		fmt.Println(" 'remove' >>", removeFormatMsg)
+		fmt.Println(" 'remove' >>", chooseMsg)
 		fmt.Println(" 'update' >>", updateFormatMsg)
 		fmt.Println(" 'reminder:set' >>", setReminderFormatMsg)
 		fmt.Println(" 'reminder:remove' >>", removeReminderFormatMsg)

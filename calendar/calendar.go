@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/somenave/eventsCalendar/events"
 	"github.com/somenave/eventsCalendar/storage"
+	"strings"
 )
 
 var ErrEventAtThisTimeExist = errors.New("there is already an event at this time")
@@ -28,6 +29,15 @@ func NewCalendar(s storage.Store) *Calendar {
 
 func (c *Calendar) GetEvents() map[string]*events.Event {
 	return c.calendarEvents
+}
+
+func (c *Calendar) FindEventByTitle(title string) *events.Event {
+	for _, e := range c.calendarEvents {
+		if strings.Contains(strings.ToLower(e.Title), strings.ToLower(title)) {
+			return e
+		}
+	}
+	return nil
 }
 
 func (c *Calendar) AddEvent(title string, date string, priority string) (*events.Event, error) {

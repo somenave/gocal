@@ -5,7 +5,7 @@ const (
 	invalidCommandErrMsg     = "Invalid command, type 'help' for list of supported commands."
 	savedCalendarMsg         = "Calendar saved"
 	addFormatMsg             = "format: add 'event name' 'date' 'priority'"
-	removeFormatMsg          = "format: remove 'event ID'"
+	chooseMsg                = "use 'Tab' for choose"
 	removeSuccessMsg         = "Event has been removed"
 	updateFormatMsg          = "format: update 'event ID' 'name' 'date' 'priority'"
 	updateSuccessMsg         = "Event has been updated"

@@ -3,10 +3,14 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/c-bata/go-prompt"
+	"github.com/somenave/eventsCalendar/events"
 	"github.com/somenave/eventsCalendar/logger"
 	"github.com/somenave/eventsCalendar/reminder"
 	"os"
 )
+
+var ErrEventNotFound = errors.New("event not found")
 
 func (c *Cmd) addEvent(args []string) {
 	if len(args) != 3 {
@@ -27,14 +31,14 @@ func (c *Cmd) addEvent(args []string) {
 	c.logger.Add(LogOutput, msg)
 }
 
-func (c *Cmd) removeEvent(args []string) {
-	if len(args) != 1 {
-		fmt.Println(removeFormatMsg)
-		c.logger.Add(LogOutput, removeFormatMsg)
+func (c *Cmd) removeEvent() {
+	event, err := c.chooseEvent()
+	if err != nil {
+		fmt.Println(err)
+		c.logger.Add(LogOutput, err.Error())
 		return
 	}
-	eventId := args[0]
-	err := c.calendar.DeleteEvent(eventId)
+	err = c.calendar.DeleteEvent(event.ID)
 	if err != nil {
 		fmt.Println(err)
 		c.logger.Add(LogOutput, err.Error())
@@ -160,4 +164,28 @@ func (c *Cmd) exit() {
 	}
 	close(c.calendar.Notification)
 	os.Exit(0)
+}
+
+func (c *Cmd) eventCompleter(d prompt.Document) []prompt.Suggest {
+	var suggestions []prompt.Suggest
+	for _, e := range c.calendar.GetEvents() {
+		suggestions = append(suggestions, prompt.Suggest{
+			Text:        e.Title,
+			Description: fmt.Sprintf("%s — %s", e.StartAt.Format("02 Jan 2006 15:04, Mon"), e.Priority),
+		})
+	}
+	return prompt.FilterContains(suggestions, d.GetWordBeforeCursor(), true)
+}
+
+func (c *Cmd) chooseEvent() (*events.Event, error) {
+	t := prompt.Input("Choose event (using tab): ", c.eventCompleter)
+
+	e := c.calendar.FindEventByTitle(t)
+	if e == nil {
+		return nil, ErrEventNotFound
+	}
+
+	fmt.Println("You choose event: ", e.String())
+
+	return e, nil
 }
